@@ -1,0 +1,14 @@
+# Dependencies
+/backend/node_modules
+
+# Temporary files
+commit_message.txt
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
