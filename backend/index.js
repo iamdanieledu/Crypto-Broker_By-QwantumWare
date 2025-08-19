@@ -30,20 +30,24 @@ app.get('/', (req, res) => {
 
 // Signup endpoint
 app.post('/api/auth/signup', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, phone } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required.' });
+  if (!email || !password || !phone) {
+    return res.status(400).json({ message: 'Email, password, and phone number are required.' });
   }
 
   const db = readDB();
 
   if (db.users.find(user => user.email === email)) {
-    return res.status(400).json({ message: 'User already exists.' });
+    return res.status(400).json({ message: 'User with this email already exists.' });
+  }
+
+  if (db.users.find(user => user.phone === phone)) {
+    return res.status(400).json({ message: 'User with this phone number already exists.' });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = { id: Date.now(), email, password: hashedPassword };
+  const newUser = { id: Date.now(), email, password: hashedPassword, phone };
 
   db.users.push(newUser);
   writeDB(db);
@@ -53,14 +57,19 @@ app.post('/api/auth/signup', async (req, res) => {
 
 // Signin endpoint
 app.post('/api/auth/signin', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, phone, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required.' });
+  if ((!email && !phone) || !password) {
+    return res.status(400).json({ message: 'Email or phone number and password are required.' });
   }
 
   const db = readDB();
-  const user = db.users.find(user => user.email === email);
+  let user;
+  if (email) {
+    user = db.users.find(user => user.email === email);
+  } else if (phone) {
+    user = db.users.find(user => user.phone === phone);
+  }
 
   if (!user) {
     return res.status(400).json({ message: 'Invalid credentials.' });
