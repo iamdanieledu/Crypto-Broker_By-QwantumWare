@@ -86,6 +86,94 @@ app.post('/api/auth/signin', async (req, res) => {
 });
 
 
+// Dashboard endpoints
+app.get('/api/dashboard/overview', (req, res) => {
+  res.json({
+    totalPortfolioValue: 81800,
+    pnl: {
+      value: 1234.56,
+      percentage: 1.53
+    }
+  });
+});
+
+app.get('/api/dashboard/portfolio', async (req, res) => {
+  try {
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
+    const data = await response.json();
+
+    const portfolio = {
+      assetBreakdown: [
+        { asset: 'Bitcoin (BTC)', price: data.bitcoin.usd, holdings: 0.5, value: data.bitcoin.usd * 0.5, chartData: [5,10,15,20,15,10,5] },
+        { asset: 'Ethereum (ETH)', price: data.ethereum.usd, holdings: 10, value: data.ethereum.usd * 10, chartData: [10,15,10,5,10,15,10] },
+        { asset: 'EUR/USD', price: 1.18, holdings: 10000, value: 11800, chartData: [1,2,3,2,1,2,3] }
+      ],
+      allocation: {
+        labels: ['Bitcoin', 'Ethereum', 'EUR/USD'],
+        data: [data.bitcoin.usd * 0.5, data.ethereum.usd * 10, 11800]
+      }
+    };
+
+    res.json(portfolio);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching portfolio data.' });
+  }
+});
+
+app.get('/api/dashboard/copy-trading', (req, res) => {
+  res.json({
+    myCopiedTraders: [
+      { name: 'TraderX', overallPnl: 15, myPnl: 500 },
+      { name: 'TraderY', overallPnl: -5, myPnl: -100 }
+    ],
+    discoverTraders: [
+      { name: 'TraderZ', overallPnl: 25, followers: 1234 },
+      { name: 'TraderW', overallPnl: 10, followers: 567 }
+    ]
+  });
+});
+
+app.get('/api/dashboard/market-data', async (req, res) => {
+  try {
+    const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1&sparkline=false');
+    const data = await response.json();
+
+    const watchlist = data.map(coin => ({
+      asset: `${coin.symbol.toUpperCase()}/USD`,
+      price: coin.current_price,
+      change: coin.price_change_percentage_24h
+    }));
+
+    const topMoversResponse = await fetch('https://api.coingecko.com/api/v3/search/trending');
+    const topMoversData = await topMoversResponse.json();
+
+    const topMovers = topMoversData.coins.slice(0, 3).map(coin => ({
+        asset: `${coin.item.symbol.toUpperCase()}/USD`,
+        change: coin.item.data.price_change_percentage_24h.usd
+    }));
+
+
+    res.json({
+      watchlist,
+      topMovers
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching market data.' });
+  }
+});
+
+app.get('/api/dashboard/recent-activity', (req, res) => {
+  res.json([
+    'Bought 0.1 BTC',
+    'Started copying TraderX',
+    'Withdrew $500',
+    'Deposited $1000',
+    'Sold 2 ETH'
+  ]);
+});
+
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
