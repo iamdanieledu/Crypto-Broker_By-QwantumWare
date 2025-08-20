@@ -99,14 +99,14 @@ app.get('/api/dashboard/overview', (req, res) => {
 
 app.get('/api/dashboard/portfolio', async (req, res) => {
   try {
-    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
     const data = await response.json();
 
     const portfolio = {
       assetBreakdown: [
-        { asset: 'Bitcoin (BTC)', price: data.bitcoin.usd, holdings: 0.5, value: data.bitcoin.usd * 0.5, chartData: [5,10,15,20,15,10,5] },
-        { asset: 'Ethereum (ETH)', price: data.ethereum.usd, holdings: 10, value: data.ethereum.usd * 10, chartData: [10,15,10,5,10,15,10] },
-        { asset: 'EUR/USD', price: 1.18, holdings: 10000, value: 11800, chartData: [1,2,3,2,1,2,3] }
+        { asset: 'Bitcoin (BTC)', price: data.bitcoin.usd, holdings: 0.5, value: data.bitcoin.usd * 0.5, change: data.bitcoin.usd_24h_change, chartData: [5,10,15,20,15,10,5] },
+        { asset: 'Ethereum (ETH)', price: data.ethereum.usd, holdings: 10, value: data.ethereum.usd * 10, change: data.ethereum.usd_24h_change, chartData: [10,15,10,5,10,15,10] },
+        { asset: 'EUR/USD', price: 1.18, holdings: 10000, value: 11800, change: 0.1, chartData: [1,2,3,2,1,2,3] }
       ],
       allocation: {
         labels: ['Bitcoin', 'Ethereum', 'EUR/USD'],

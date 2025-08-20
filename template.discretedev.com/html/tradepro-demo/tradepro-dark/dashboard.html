@@ -230,14 +230,14 @@
   <div class="container">
     <div class="row">
       <!-- Main Overview -->
-      <div class="col-lg-12">
+      <div class="col-lg-6">
         <div class="card">
           <div class="card-header">
             <h2>Main Overview</h2>
           </div>
           <div class="card-body">
             <div class="row">
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="card text-center">
                   <div class="card-body">
                     <h5 class="card-title">Total Portfolio Value</h5>
@@ -245,7 +245,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="card text-center">
                   <div class="card-body">
                     <h5 class="card-title">24h Profit/Loss</h5>
@@ -253,19 +253,21 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-4">
-                <div class="card">
-                  <div class="card-body">
-                    <h5 class="card-title">Quick Actions</h5>
-                    <div class="d-grid gap-2">
-                      <a href="#" class="btn btn-primary">Deposit</a>
-                      <a href="#" class="btn btn-secondary">Withdraw</a>
-                      <a href="#" class="btn btn-info">New Trade</a>
-                      <a href="#" class="btn btn-warning">Find Traders to Copy</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            <h2>Quick Actions</h2>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <a href="deposit.html" class="btn btn-primary">Deposit</a>
+              <a href="withdraw.html" classs="btn btn-secondary">Withdraw</a>
+              <a href="trade.html" class="btn btn-info">New Trade</a>
+              <a href="#copy-trading" class="btn btn-warning">Find Traders to Copy</a>
             </div>
           </div>
         </div>
@@ -574,14 +576,18 @@
                 <td>${asset.price.toLocaleString()}</td>
                 <td>${asset.holdings}</td>
                 <td>${asset.value.toLocaleString()}</td>
+                <td class="${asset.change > 0 ? 'text-success' : 'text-danger'}">${asset.change > 0 ? '+' : ''}${asset.change}%</td>
                 <td><span class="sparkline" data-sparkline-data='${JSON.stringify(asset.chartData)}'></span></td>
               </tr>
             `;
             portfolioTableBody.innerHTML += row;
           });
 
-          const allocationCtx = document.getElementById('allocation-chart-placeholder').getContext('2d');
-          new Chart(allocationCtx, {
+          const allocationCtx = document.getElementById('allocation-chart').getContext('2d');
+          const performanceCtx = document.getElementById('performance-chart').getContext('2d');
+          const toggleChartBtn = document.getElementById('toggle-chart-btn');
+
+          const allocationChart = new Chart(allocationCtx, {
             type: 'pie',
             data: {
               labels: data.allocation.labels,
@@ -595,6 +601,35 @@
                 ],
                 hoverOffset: 4
               }]
+            }
+          });
+
+          const performanceChart = new Chart(performanceCtx, {
+            type: 'line',
+            data: {
+              labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+              datasets: [{
+                label: 'Portfolio Performance',
+                data: [75000, 78000, 76000, 81000, 85000, 81800],
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+              }]
+            }
+          });
+
+          toggleChartBtn.addEventListener('click', () => {
+            const allocationChartEl = document.getElementById('allocation-chart');
+            const performanceChartEl = document.getElementById('performance-chart');
+
+            if (allocationChartEl.style.display === 'none') {
+              allocationChartEl.style.display = 'block';
+              performanceChartEl.style.display = 'none';
+              toggleChartBtn.textContent = 'View Performance';
+            } else {
+              allocationChartEl.style.display = 'none';
+              performanceChartEl.style.display = 'block';
+              toggleChartBtn.textContent = 'View Allocation';
             }
           });
 
